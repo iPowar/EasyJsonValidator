@@ -1,4 +1,5 @@
 <?php
+
 namespace Powar\JsonValidator;
 
 /**
@@ -41,7 +42,6 @@ class Validator
                 $this->check($key, $rule, $data);
             }
         }
-
     }
 
     /**

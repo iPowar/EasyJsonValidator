@@ -1,0 +1,27 @@
+{
+  "name":         "powar/json-validator",
+  "description":  "",
+  "keywords":     ["json", "validator"],
+  "type":         "library",
+  "license":      "MIT",
+  "authors":      [
+    {
+      "name":      "Mikhail Kudryashov",
+      "email":     "powardev@ya.ru"
+    }
+  ],
+
+  "require": {
+    "php": ">=5.3.3"
+  },
+
+  "require-dev": {
+    "phpunit/phpunit": "~4.5"
+  },
+
+  "autoload": {
+    "psr-4": {
+      "Powar\\": "src/"
+    }
+  }
+}

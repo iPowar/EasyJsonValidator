@@ -1,13 +1,14 @@
 <?php
 use Powar\JsonValidator\Validator;
 
+error_reporting(E_ALL);
+
 include_once('Validator.php');
 
 $json = ['id' => 11, 'me' => '12', 'numeric' => null];
 
 $json = json_encode($json);
-$validator = new Validator($json);
-
+$validator = new Validator();
 
 $rules = array(
     'id' => array(

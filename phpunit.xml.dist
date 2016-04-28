@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit colors="true" bootstrap="vendor/autoload.php">
+    <testsuites>
+        <testsuite name="JsonValidator test suite">
+            <directory>./tests/JsonValidator/</directory>
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <whitelist>
+            <directory>./src/JsonValidator/</directory>
+        </whitelist>
+    </filter>
+</phpunit>
