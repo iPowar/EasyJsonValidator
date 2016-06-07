@@ -1,6 +1,7 @@
 <?php
-
 namespace Powar\JsonValidator;
+
+use DateTime;
 
 /**
  * @author Kudryashov Mikhail <powardev@ya.ru>
@@ -11,21 +12,28 @@ class Validator
     const TYPE_INTEGER = 'int';
     const TYPE_BOOLEAN = 'bool';
     const TYPE_NUMBER = 'number';
-    const TYPE_OBJECT = 'object';
     const TYPE_ARRAY = 'array';
     const TYPE_NULL = 'null';
     const TYPE_ANY = 'any';
+    const TYPE_DATETIME = 'datetime';
 
     const KEY_TYPE = 'type';
     const KEY_REQUIRE = 'require';
     const KEY_MIN = 'min';
     const KEY_MAX = 'max';
     const KEY_PATTERN = 'pattern';
+    const KEY_FORMAT = 'format';
+    const KEY_RULE = 'rule';
 
     /**
      * @var array
      */
     private $errorList = array();
+
+    /**
+     * @var string
+     */
+    private $dateTimeFormat = DateTime::ISO8601;
 
     /**
      * @param string $json
@@ -82,7 +90,7 @@ class Validator
     /**
      * @param string $message
      */
-    private function addError($message)
+    protected function addError($message)
     {
         $this->errorList[] = $message;
     }
@@ -108,10 +116,17 @@ class Validator
         $max = null;
         $min = null;
         $ruleKey = $rule;
+        $format = null;
+        $includeRule = null;
 
         if (is_array($rule)) {
-            $require = isset($rule[self::KEY_REQUIRE]) && is_bool($rule[self::KEY_REQUIRE]) ?: $rule[self::KEY_REQUIRE];
+            $require = isset($rule[self::KEY_REQUIRE]) && is_bool($rule[self::KEY_REQUIRE]) ? $rule[self::KEY_REQUIRE] : $require;
+            $max = !empty($rule[self::KEY_MAX]) ? $rule[self::KEY_MAX] : $max;
+            $min = !empty($rule[self::KEY_MIN]) ? $rule[self::KEY_MIN] : $min;
             $ruleKey = $rule[self::KEY_TYPE];
+            $format = !empty($rule[self::KEY_FORMAT]) ? $rule[self::KEY_FORMAT] : $format;
+            $includeRule = !empty($rule[self::KEY_RULE]) ? $rule[self::KEY_RULE] : $includeRule;
+            $pattern = !empty($rule[self::KEY_PATTERN]) ? $rule[self::KEY_PATTERN] : $pattern;
         }
 
         if (!array_key_exists($key, $data) && $require) {
@@ -123,54 +138,76 @@ class Validator
         switch ($ruleKey) {
             case self::TYPE_INTEGER:
                 if (!is_int($data[$key])) {
-                    $this->addError($key . ' must be '. self::TYPE_INTEGER);
+                    $this->addError($key . ' must be ' . self::TYPE_INTEGER);
 
                     return;
-                }
+                } elseif ($max && $data[$key] > $max) {
+                    $this->addError($key . ' must be less than' . $max);
 
-                if ($max !== null && $data[$key]) {
+                    return;
+                } elseif ($min && $data[$key] < $min) {
+                    $this->addError($key . ' must be more than' . $min);
 
+                    return;
                 }
 
                 break;
             case self::TYPE_NUMBER:
                 if (!is_numeric($data[$key])) {
-                    $this->addError($key . ' must be '. self::TYPE_NUMBER);
+                    $this->addError($key . ' must be ' . self::TYPE_NUMBER);
 
                     return;
                 }
+
                 break;
             case self::TYPE_STRING:
                 if (!is_string($data[$key])) {
-                    $this->addError($key . ' must be '. self::TYPE_STRING);
+                    $this->addError($key . ' must be ' . self::TYPE_STRING);
 
                     return;
                 }
+
+                if ($pattern !== null) {
+                    $result = preg_match($pattern, $key);
+                    if ($result === 0) {
+                        $this->addError($key . ' must match the pattern ' . $pattern);
+                    } elseif ($result === false) {
+                        $this->addError($pattern .' has error: ' . preg_last_error());
+                    }
+                }
+
                 break;
             case self::TYPE_ARRAY:
                 if (!is_array($data[$key])) {
-                    $this->addError($key . ' must be '. self::TYPE_ARRAY);
+                    $this->addError($key . ' must be ' . self::TYPE_ARRAY);
 
                     return;
+                } elseif ($includeRule) {
+                    $this->validate(json_encode($data[$key]), $includeRule);
                 }
-                break;
-            case self::TYPE_OBJECT:
                 break;
             case self::TYPE_NULL:
                 if (!is_null($data[$key])) {
-                    $this->addError($key . ' must be '. self::TYPE_NULL);
+                    $this->addError($key . ' must be ' . self::TYPE_NULL);
 
                     return;
                 }
+                break;
+            case self::TYPE_DATETIME:
+                $dateTime = $data[$key];
+                $format = $format ? $format : $this->dateTimeFormat;
+                if (!DateTime::createFromFormat($format, $dateTime)) {
+                    $this->addError($key . ' must be ' . self::TYPE_DATETIME . '(' . $format . ')');
+                }
+                return;
                 break;
             case self::TYPE_ANY:
                 break;
             default:
-                $this->addError('type '. $rule[self::KEY_TYPE] . ' not supported');
+                $this->addError('type ' . $rule[self::KEY_TYPE] . ' not supported');
 
                 return;
                 break;
         }
-
     }
 }
