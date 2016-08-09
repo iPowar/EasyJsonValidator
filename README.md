@@ -89,7 +89,7 @@ Validator::KEY_RULE - 'format'; проверка поля по формату
 
 
 --todo
-*checkrule
+checkrule test
 validate by pattern
 readmy
 speed test

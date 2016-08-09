@@ -96,11 +96,85 @@ class Validator
     }
 
     /**
-     * @param $rule
+     * @param string $rule
      * @return bool
      */
     private function checkRule($rule)
     {
+        if (!is_array($rule)) {
+            return $this->checkRuleType($rule);
+        }
+
+        if (empty($rule[Validator::KEY_TYPE])) {
+            $this->addError('key type missing for rule');
+
+            return false;
+        }
+
+        if (!$this->checkRuleType($rule[Validator::KEY_TYPE])) {
+            return false;
+        }
+
+        $availableOptions = $this->getRulesOptions();
+        $ruleOptions = $availableOptions[$rule[Validator::KEY_TYPE]];
+
+        foreach ($rule as $key => $value) {
+            if ($key !== Validator::KEY_TYPE && !in_array($key, $ruleOptions)) {
+                $this->addError('key ' . $key . ' not supported');
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @return array
+     */
+    private function getRulesOptions()
+    {
+        return [
+            self::TYPE_STRING => [self::KEY_REQUIRE, self::KEY_MIN, self::KEY_MAX, self::KEY_PATTERN],
+            self::TYPE_DATETIME => [self::KEY_REQUIRE, self::KEY_MIN, self::KEY_MAX, self::KEY_FORMAT],
+            self::TYPE_INTEGER => [self::KEY_REQUIRE, self::KEY_MIN, self::KEY_MAX],
+            self::TYPE_NUMBER => [self::KEY_REQUIRE, self::KEY_MIN, self::KEY_MAX],
+            self::TYPE_ARRAY => [self::KEY_REQUIRE, self::KEY_MIN, self::KEY_MAX],
+            self::TYPE_BOOLEAN => [self::KEY_REQUIRE],
+            self::TYPE_NULL => [self::KEY_REQUIRE],
+            self::TYPE_ANY => [self::KEY_REQUIRE],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getTypes()
+    {
+        return [
+            self::TYPE_STRING,
+            self::TYPE_INTEGER,
+            self::TYPE_BOOLEAN,
+            self::TYPE_NUMBER,
+            self::TYPE_ARRAY,
+            self::TYPE_NULL,
+            self::TYPE_ANY,
+            self::TYPE_DATETIME,
+        ];
+    }
+
+    /**
+     * @param string $rule
+     * @return bool
+     */
+    private function checkRuleType($rule)
+    {
+        if (!in_array($rule, $this->getTypes())) {
+            $this->addError($rule . ' not supported');
+
+            return false;
+        }
+
         return true;
     }
 
