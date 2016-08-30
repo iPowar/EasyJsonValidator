@@ -1,4 +1,3 @@
-
 Introduction
 -------------
 
@@ -94,5 +93,4 @@ validate by pattern
 readmy
 speed test
 error code
-
- 
+https://habrahabr.ru/post/308298/
