@@ -1,7 +1,7 @@
 <?php
 use Powar\JsonValidator\Validator;
 
-include_once('vendor/autoload.php');
+include_once('../vendor/autoload.php');
 
 $json = ['id' => 11, 'me' => '12', 'numeric' => null, 'date' => date(DateTime::ISO8601)];
 

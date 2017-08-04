@@ -1,7 +1,7 @@
 {
   "name":         "powar/json-validator",
   "description":  "",
-  "keywords":     ["json", "validator"],
+  "keywords":     ["json", "validator", "php"],
   "type":         "library",
   "license":      "MIT",
   "authors":      [

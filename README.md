@@ -1,7 +1,7 @@
 Introduction
 -------------
 
-EasyJsonValidator - простой валидатор Json для PHP
+EasyJsonValidator - simple Json validator for PHP
 
 Installation
 -------------
@@ -9,83 +9,97 @@ Installation
 
 Usage
 -----
-//get any json
-$json = json_encode(['id' => 11, 'name' => 'JohnDoe', 'balance' => null, 'date' => date(DateTime::ISO8601)]);
+**get any json**
 
-//create rules
-$rules = [
-    'id' => [
-        Validator::KEY_TYPE => Validator::TYPE_INTEGER,
-        Validator::KEY_MAX => 10
-    ],
-    'name' => Validator::TYPE_STRING,
-    'balance' => Validator::TYPE_NULL,
-    'date' => Validator::TYPE_DATETIME,
-];
+    $json = json_encode(['id' => 11, 'name' => 'JohnDoe', 'balance' => null, 'date' => date(DateTime::ISO8601)]);
 
-//validate
-$validator = new Validator();
-$validator->validate($json, $rules);
+**create rules**
 
-//check errors exist
-if ($validator->hasErrors()) {
-//get errors array if exist
-    var_dump($validator->getErrors());
-}
+    $rules = [
+        'id' => [
+            Validator::KEY_TYPE => Validator::TYPE_INTEGER,
+            Validator::KEY_MAX => 10
+        ],
+        'name' => Validator::TYPE_STRING,
+        'balance' => Validator::TYPE_NULL,
+        'date' => Validator::TYPE_DATETIME,
+    ];
+
+**validate**
+
+    $validator = new Validator();
+    $validator->validate($json, $rules);
+
+**check errors exist**
+
+    if ($validator->hasErrors()) {
+        var_dump($validator->getErrors());
+    }
 
 
 Documentation
 -------------
-Make rules
-Метод validate принимает вторым параметром массив правил для валидирования
-Простой пример: 
-$rules = ['id' => 'int']
-это правило будет проверять входящий json только на соответствие поля id - integer. 
-Обратите внимание, Вы можете писать явно 'int' или другой тип, но я рекомендую использовать константы, это обезопасит ваш код, если с обновлением библиотеки, что то изменится
+**Make rules**
 
-Простой пример с константой : 
-$rules = ['id' => Validator::TYPE_INTEGER]
+The validate method takes a second parameter with array of rules for validation
 
-Перечень констант: 
-Validator::TYPE_STRING - 'string';
-Поддерживается MAX MIN REQUIRE PATTERN
+simple example: 
 
+    $rules = ['id' => 'int']
+    $validator->validate($json, $rules);
 
-Validator::TYPE_INTEGER - 'int';
-Поддерживается MAX MIN REQUIRE
+This rule will only check the incoming json for matching the _id:integer_ field.
 
-Validator::TYPE_BOOLEAN - 'bool';
-Поддерживается REQUIRE
+**_Note, you can write explicitly 'int' or another type, but I recommend using constants._**
 
-Validator::TYPE_NUMBER - 'number';
-Поддерживается MAX MIN REQUIRE
+example with constant: 
 
-Validator::TYPE_ARRAY - 'array';
-Поддерживается MAX MIN RULE
+    $rules = ['id' => Validator::TYPE_INTEGER]
 
-Validator::TYPE_ANY - 'any';
-Поддерживается REQUIRE
+**List of constants for rules:** 
 
-Validator::TYPE_DATETIME - 'datetime';
-Поддерживается MAX MIN REQUIRE FORMAT
+ **Validator::TYPE_STRING** - 'string'; 
+ can have configure: MAX_STR, MIN_STR, REQUIRE, PATTERN
+   
+ 
+ - **Validator::TYPE_INTEGER** - 'int'; 
+can have configure: MAX_STR, MIN_STR, MIN_VAL, MAX_VAL, REQUIRE
+   
+ -  **Validator::TYPE_BOOLEAN** - 'bool'; 
+can have configure: REQUIRE
+   
+ -  **Validator::TYPE_NUMBER** - 'number'; 
+can have configure: MAX, MIN, REQUIRE
+   
+ -  **Validator::TYPE_ARRAY** - 'array'; 
+can have configure: MIN_VAL, MAX_VAL, RULE
+   
+ -  **Validator::TYPE_ANY** - 'any'; 
+can have configure: REQUIRE
+   
+ -  **Validator::TYPE_DATETIME** - 'datetime'; 
+can have configure: MIN_VAL, MAX_VAL, REQUIRE, FORMAT
+   
+example with configure:
 
-Пример с настройкой:
-$rules = ['id' => [
-            Validator::KEY_TYPE => Validator::TYPE_INTEGER,
-            Validator::KEY_MAX => 10
-            ]
-         ]
+    $rules = ['id' => [
+                Validator::KEY_TYPE => Validator::TYPE_INTEGER,
+                Validator::KEY_MAX => 10
+                ]
+             ]
+
 Обратите внимание, теперь id содержит массив, где обязательным ключём является Validator::KEY_TYPE, который должен содержать тип как и в простом случае
 
-Доступные константы для настройки: 
-Validator::KEY_TYPE - 'type'; Обязательный ключ, если используется массив настроек правила
-Validator::KEY_REQUIRE - 'require'; По умолчанию true
-Validator::KEY_MIN - 'min'; минимальное значение поля
-Validator::KEY_MAX - 'max'; максимальное значение поля
-Validator::KEY_PATTERN - 'pattern'; проверка поля по шаблону
-Validator::KEY_FORMAT - 'format'; проверка поля по формату
-Validator::KEY_RULE - 'format'; проверка поля по формату
+**Доступные константы для настройки:** 
 
+ - Validator::KEY_TYPE - 'type'; Обязательный ключ, если используется
+   массив настроек правила 
+ - Validator::KEY_REQUIRE - 'require'; По умолчанию true 
+ - Validator::KEY_MIN - 'min'; минимальное значение поля
+ - Validator::KEY_MAX - 'max'; максимальное значение поля
+ - Validator::KEY_PATTERN - 'pattern'; проверка поля по шаблону
+ - Validator::KEY_FORMAT - 'format'; проверка поля по формату
+ - Validator::KEY_RULE - 'format'; проверка поля по формату
 
 --todo
 checkrule test
@@ -93,4 +107,3 @@ validate by pattern
 readmy
 speed test
 error code
-https://habrahabr.ru/post/308298/
