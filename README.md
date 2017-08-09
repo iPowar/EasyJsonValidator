@@ -151,6 +151,36 @@ And use it for any rules:
         'some_date' => $dateRule,
     ];
 
+NOTE! In case when you create rule for TYPE_DATETIME, you need be careful, because KEY_MIN_VAL and KEY_MAX_VAL can work is not obvious
+    
+For Example, you need to create check for day of birth (Over 18 years of age, you know ;) )
+
+    $minDate = new DateTime();
+    $minDate->modify('-18 year');
+    $format = 'Y-m-d';
+
+    $rule = [
+        'day_of_birth' => [
+            Validator::KEY_TYPE => Validator::TYPE_DATETIME,
+            Validator::KEY_FORMAT => $format,
+            Validator::KEY_MIN_VAL => $minDate->format($format), //<< WRONG
+        ]
+    ];
+    
+Should be with **Validator::KEY_MAX_VAL** :
+
+    $minDate = new DateTime();
+    $minDate->modify('-18 year');
+    $format = 'Y-m-d';
+
+    $rule = [
+        'day_of_birth' => [
+            Validator::KEY_TYPE => Validator::TYPE_DATETIME,
+            Validator::KEY_FORMAT => $format,
+            Validator::KEY_MAX_VAL => $minDate->format($format),
+        ]
+    ];
+     
 
 --todo
 checkrule test
