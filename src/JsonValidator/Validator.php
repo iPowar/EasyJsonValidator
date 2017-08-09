@@ -285,19 +285,27 @@ class Validator
             $this->addError($key . ' must be less than ' . $maxStr . ' symbols');
 
             return;
-        } elseif ($minStr && strlen($data[$key]) < $minStr) {
+        }
+
+        if ($minStr && strlen($data[$key]) < $minStr) {
             $this->addError($key . ' must be more than ' . $minStr . ' symbols');
 
             return;
-        } elseif ($minVal && $data[$key] < $minVal) {
+        }
+
+        if ($minVal && $data[$key] < $minVal) {
             $this->addError($key . ' must be more than ' . $minVal);
 
             return;
-        } elseif ($maxVal && $data[$key] > $maxVal) {
+        }
+
+        if ($maxVal && $data[$key] > $maxVal) {
             $this->addError($key . ' must be less than ' . $maxVal);
 
             return;
-        } elseif ($pattern !== null) {
+        }
+
+        if ($pattern !== null) {
             $result = preg_match($pattern, $key);
             if ($result === 0) {
                 $this->addError($key . ' must match the pattern ' . $pattern);
