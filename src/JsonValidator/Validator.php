@@ -40,17 +40,24 @@ class Validator
     private $dateTimeFormat = DateTime::ISO8601;
 
     /**
+     * @var array
+     */
+    private $errorFieldList;
+
+    /**
      * @param string $json
      * @param array $rules
      */
     public function validate($json, array $rules)
     {
         $data = $this->parseJson($json);
+        if ($this->hasErrors()) {
+            return;
+        }
 
         foreach ($rules as $key => $rule) {
-            $this->checkRule($rule, $key);
-
-            if (!$this->hasErrors()) {
+            $ruleValidate = $this->checkRule($rule, $key);
+            if ($ruleValidate) {
                 $this->check($key, $rule, $data);
             }
         }
@@ -61,11 +68,15 @@ class Validator
      */
     public function hasErrors()
     {
-        if (!empty($this->errorList)) {
-            return true;
-        }
+        return !empty($this->errorList) ?: false;
+    }
 
-        return false;
+    /**
+     * @return bool
+     */
+    public function hasErrorField()
+    {
+        return !empty($this->errorFieldList) ?: false;
     }
 
     /**
@@ -74,6 +85,14 @@ class Validator
     public function getErrors()
     {
         return $this->errorList;
+    }
+
+    /**
+     * @return array
+     */
+    public function getErrorFieldList()
+    {
+        return $this->errorFieldList;
     }
 
     /**
@@ -214,6 +233,7 @@ class Validator
 
         if (!array_key_exists($key, $data) && $require) {
             $this->addError($key . ' is require');
+            $this->addFiledError($key, 'is require');
 
             return;
         } elseif (!array_key_exists($key, $data) && !$require) {
@@ -224,6 +244,7 @@ class Validator
             case self::TYPE_INTEGER:
                 if (!is_int($data[$key])) {
                     $this->addError($key . ' must be ' . self::TYPE_INTEGER);
+                    $this->addFiledError($key, ' must be ' . self::TYPE_INTEGER);
 
                     return;
                 }
@@ -232,6 +253,7 @@ class Validator
             case self::TYPE_NUMBER:
                 if (!is_numeric($data[$key])) {
                     $this->addError($key . ' must be ' . self::TYPE_NUMBER);
+                    $this->addFiledError($key, ' must be ' . self::TYPE_NUMBER);
 
                     return;
                 }
@@ -240,6 +262,7 @@ class Validator
             case self::TYPE_STRING:
                 if (!is_string($data[$key])) {
                     $this->addError($key . ' must be ' . self::TYPE_STRING);
+                    $this->addFiledError($key, ' must be ' . self::TYPE_STRING);
 
                     return;
                 }
@@ -248,6 +271,7 @@ class Validator
             case self::TYPE_ARRAY:
                 if (!is_array($data[$key])) {
                     $this->addError($key . ' must be ' . self::TYPE_ARRAY);
+                    $this->addFiledError($key, ' must be ' . self::TYPE_ARRAY);
 
                     return;
                 } elseif ($includeRule) {
@@ -258,6 +282,7 @@ class Validator
             case self::TYPE_NULL:
                 if (!is_null($data[$key])) {
                     $this->addError($key . ' must be ' . self::TYPE_NULL);
+                    $this->addFiledError($key, ' must be ' . self::TYPE_NULL);
 
                     return;
                 }
@@ -268,6 +293,7 @@ class Validator
                 $format = $format ? $format : $this->dateTimeFormat;
                 if (!DateTime::createFromFormat($format, $dateTime)) {
                     $this->addError($key . ' must be ' . self::TYPE_DATETIME . '(' . $format . ')');
+                    $this->addFiledError($key, ' must be ' . self::TYPE_DATETIME . '(' . $format . ')');
 
                     return;
                 }
@@ -283,24 +309,28 @@ class Validator
 
         if ($maxStr && strlen($data[$key]) > $maxStr) {
             $this->addError($key . ' must be less than ' . $maxStr . ' symbols');
+            $this->addFiledError($key, ' must be less than ' . $maxStr . ' symbols');
 
             return;
         }
 
         if ($minStr && strlen($data[$key]) < $minStr) {
             $this->addError($key . ' must be more than ' . $minStr . ' symbols');
+            $this->addFiledError($key, ' must be more than ' . $minStr . ' symbols');
 
             return;
         }
 
         if ($minVal && $data[$key] < $minVal) {
             $this->addError($key . ' must be more than ' . $minVal);
+            $this->addFiledError($key, ' must be more than ' . $minVal);
 
             return;
         }
 
         if ($maxVal && $data[$key] > $maxVal) {
             $this->addError($key . ' must be less than ' . $maxVal);
+            $this->addFiledError($key, ' must be less than ' . $maxVal);
 
             return;
         }
@@ -309,6 +339,7 @@ class Validator
             $result = preg_match($pattern, $key);
             if ($result === 0) {
                 $this->addError($key . ' must match the pattern ' . $pattern);
+                $this->addFiledError($key, ' must match the pattern ' . $pattern);
 
                 return;
             } elseif ($result === false) {
@@ -317,5 +348,14 @@ class Validator
                 return;
             }
         }
+    }
+
+    /**
+     * @param $key
+     * @param $message
+     */
+    private function addFiledError($key, $message)
+    {
+        $this->errorFieldList[$key] = $message;
     }
 }
