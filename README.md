@@ -59,17 +59,17 @@ example with constant:
 **List of constants for rules:** 
 
  **Validator::TYPE_STRING** - 'string'; 
- can have configure: MAX_STR, MIN_STR, REQUIRE, PATTERN
+ can have configure: MAX_STR, MIN_STR, REQUIRE, PATTERN, CALLBACK
    
  
  - **Validator::TYPE_INTEGER** - 'int'; 
-can have configure: MAX_STR, MIN_STR, MIN_VAL, MAX_VAL, REQUIRE
+can have configure: MAX_STR, MIN_STR, MIN_VAL, MAX_VAL, REQUIRE, CALLBACK
    
  -  **Validator::TYPE_BOOLEAN** - 'bool'; 
-can have configure: REQUIRE
+can have configure: REQUIRE, CALLBACK
    
  -  **Validator::TYPE_NUMBER** - 'number'; 
-can have configure: MAX, MIN, REQUIRE
+can have configure: MAX, MIN, REQUIRE, CALLBACK
    
  -  **Validator::TYPE_ARRAY** - 'array'; 
 can have configure: MIN_VAL, MAX_VAL, RULE
@@ -78,7 +78,7 @@ can have configure: MIN_VAL, MAX_VAL, RULE
 can have configure: REQUIRE
    
  -  **Validator::TYPE_DATETIME** - 'datetime'; 
-can have configure: MIN_VAL, MAX_VAL, REQUIRE, FORMAT
+can have configure: MIN_VAL, MAX_VAL, REQUIRE, FORMAT, CALLBACK
    
 example with configure:
 
@@ -100,7 +100,8 @@ _**Note that now id contains an array where the required key is Validator :: KEY
  - Validator::KEY_MAX_VAL - 'max-val'; Maximum value
  - Validator::KEY_PATTERN - 'pattern'; check by regexp 
  - Validator::KEY_FORMAT - 'format'; check by format
- - Validator::KEY_RULE - 'format'; include rule
+ - Validator::KEY_RULE - 'rule'; include rule
+ - Validator::KEY_CALLBACK - 'callback'; check by callback
 
 
 Some examples
@@ -181,6 +182,16 @@ Should be with **Validator::KEY_MAX_VAL** :
         ]
     ];
      
+Callback example
+
+     $rule = [
+         'email' => [
+             Validator::KEY_TYPE => Validator::TYPE_STRING,
+             Validator::KEY_CALLBACK => function($email) {
+                return filter_var($email, FILTER_VALIDATE_EMAIL);
+             }
+         ]
+     ];
 
 --todo
 checkrule test
