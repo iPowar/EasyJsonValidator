@@ -24,6 +24,7 @@ class Validator
     const KEY_MIN_VAL = 'min-val';
     const KEY_MAX_STR = 'max-str';
     const KEY_MAX_VAL = 'max-val';
+    const KEY_CALLBACK = 'callback';
 
     const KEY_PATTERN = 'pattern';
     const KEY_FORMAT = 'format';
@@ -159,12 +160,12 @@ class Validator
     private function getRulesOptions()
     {
         return [
-            self::TYPE_STRING => [self::KEY_REQUIRE, self::KEY_MIN_STR, self::KEY_MAX_STR, self::KEY_PATTERN],
-            self::TYPE_DATETIME => [self::KEY_REQUIRE, self::KEY_MIN_VAL, self::KEY_MAX_VAL, self::KEY_FORMAT],
-            self::TYPE_INTEGER => [self::KEY_REQUIRE, self::KEY_MIN_VAL, self::KEY_MAX_VAL, self::KEY_MIN_STR, self::KEY_MAX_STR],
-            self::TYPE_NUMBER => [self::KEY_REQUIRE, self::KEY_MIN_VAL, self::KEY_MAX_VAL, self::KEY_MIN_STR, self::KEY_MAX_STR],
+            self::TYPE_STRING => [self::KEY_REQUIRE, self::KEY_MIN_STR, self::KEY_MAX_STR, self::KEY_PATTERN, self::KEY_CALLBACK],
+            self::TYPE_DATETIME => [self::KEY_REQUIRE, self::KEY_MIN_VAL, self::KEY_MAX_VAL, self::KEY_FORMAT, self::KEY_CALLBACK],
+            self::TYPE_INTEGER => [self::KEY_REQUIRE, self::KEY_MIN_VAL, self::KEY_MAX_VAL, self::KEY_MIN_STR, self::KEY_MAX_STR, self::KEY_CALLBACK],
+            self::TYPE_NUMBER => [self::KEY_REQUIRE, self::KEY_MIN_VAL, self::KEY_MAX_VAL, self::KEY_MIN_STR, self::KEY_MAX_STR, self::KEY_CALLBACK],
             self::TYPE_ARRAY => [self::KEY_REQUIRE, self::KEY_MIN_VAL, self::KEY_MAX_VAL],
-            self::TYPE_BOOLEAN => [self::KEY_REQUIRE],
+            self::TYPE_BOOLEAN => [self::KEY_REQUIRE, self::KEY_CALLBACK],
             self::TYPE_NULL => [self::KEY_REQUIRE],
             self::TYPE_ANY => [self::KEY_REQUIRE],
         ];
@@ -218,6 +219,7 @@ class Validator
         $ruleKey = $rule;
         $format = null;
         $includeRule = null;
+        $callback = null;
 
         if (is_array($rule)) {
             $require = isset($rule[self::KEY_REQUIRE]) && is_bool($rule[self::KEY_REQUIRE]) ? $rule[self::KEY_REQUIRE] : $require;
@@ -229,6 +231,8 @@ class Validator
             $format = !empty($rule[self::KEY_FORMAT]) ? $rule[self::KEY_FORMAT] : $format;
             $includeRule = !empty($rule[self::KEY_RULE]) ? $rule[self::KEY_RULE] : $includeRule;
             $pattern = !empty($rule[self::KEY_PATTERN]) ? $rule[self::KEY_PATTERN] : $pattern;
+            /** @var \Closure $callback */
+            $callback = !empty($rule[self::KEY_CALLBACK]) ? $rule[self::KEY_CALLBACK] : $callback;
         }
 
         if (!array_key_exists($key, $data) && $require) {
@@ -344,6 +348,14 @@ class Validator
                 return;
             } elseif ($result === false) {
                 $this->addError($pattern . ' has error: ' . preg_last_error());
+
+                return;
+            }
+        }
+
+        if ($callback && is_callable($callback)) {
+            if (!$callback->call($this, $data[$key])) {
+                $this->addError($key . ' has error by callback');
 
                 return;
             }
