@@ -164,7 +164,7 @@ class Validator
             self::TYPE_DATETIME => [self::KEY_REQUIRE, self::KEY_MIN_VAL, self::KEY_MAX_VAL, self::KEY_FORMAT, self::KEY_CALLBACK],
             self::TYPE_INTEGER => [self::KEY_REQUIRE, self::KEY_MIN_VAL, self::KEY_MAX_VAL, self::KEY_MIN_STR, self::KEY_MAX_STR, self::KEY_CALLBACK],
             self::TYPE_NUMBER => [self::KEY_REQUIRE, self::KEY_MIN_VAL, self::KEY_MAX_VAL, self::KEY_MIN_STR, self::KEY_MAX_STR, self::KEY_CALLBACK],
-            self::TYPE_ARRAY => [self::KEY_REQUIRE, self::KEY_MIN_VAL, self::KEY_MAX_VAL],
+            self::TYPE_ARRAY => [self::KEY_REQUIRE, self::KEY_MIN_VAL, self::KEY_MAX_VAL, self::KEY_RULE],
             self::TYPE_BOOLEAN => [self::KEY_REQUIRE, self::KEY_CALLBACK],
             self::TYPE_NULL => [self::KEY_REQUIRE],
             self::TYPE_ANY => [self::KEY_REQUIRE],
@@ -279,7 +279,9 @@ class Validator
 
                     return;
                 } elseif ($includeRule) {
-                    $this->validate(json_encode($data[$key]), $includeRule);
+                    foreach ($data[$key] as $element) {
+                        $this->validate(json_encode($element), $includeRule);
+                    }
                 }
 
                 break;
