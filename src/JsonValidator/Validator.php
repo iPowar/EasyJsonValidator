@@ -29,6 +29,7 @@ class Validator
     const KEY_PATTERN = 'pattern';
     const KEY_FORMAT = 'format';
     const KEY_RULE = 'rule';
+    const KEY_ARRAY_TYPE = 'array-type';
 
     /**
      * @var array
@@ -164,7 +165,7 @@ class Validator
             self::TYPE_DATETIME => [self::KEY_REQUIRE, self::KEY_MIN_VAL, self::KEY_MAX_VAL, self::KEY_FORMAT, self::KEY_CALLBACK],
             self::TYPE_INTEGER => [self::KEY_REQUIRE, self::KEY_MIN_VAL, self::KEY_MAX_VAL, self::KEY_MIN_STR, self::KEY_MAX_STR, self::KEY_CALLBACK],
             self::TYPE_NUMBER => [self::KEY_REQUIRE, self::KEY_MIN_VAL, self::KEY_MAX_VAL, self::KEY_MIN_STR, self::KEY_MAX_STR, self::KEY_CALLBACK],
-            self::TYPE_ARRAY => [self::KEY_REQUIRE, self::KEY_MIN_VAL, self::KEY_MAX_VAL, self::KEY_RULE],
+            self::TYPE_ARRAY => [self::KEY_REQUIRE, self::KEY_MIN_VAL, self::KEY_MAX_VAL, self::KEY_RULE, self::KEY_ARRAY_TYPE],
             self::TYPE_BOOLEAN => [self::KEY_REQUIRE, self::KEY_CALLBACK],
             self::TYPE_NULL => [self::KEY_REQUIRE],
             self::TYPE_ANY => [self::KEY_REQUIRE],
@@ -220,6 +221,7 @@ class Validator
         $format = null;
         $includeRule = null;
         $callback = null;
+        $arrayType = null;
 
         if (is_array($rule)) {
             $require = isset($rule[self::KEY_REQUIRE]) && is_bool($rule[self::KEY_REQUIRE]) ? $rule[self::KEY_REQUIRE] : $require;
@@ -233,6 +235,7 @@ class Validator
             $pattern = !empty($rule[self::KEY_PATTERN]) ? $rule[self::KEY_PATTERN] : $pattern;
             /** @var \Closure $callback */
             $callback = !empty($rule[self::KEY_CALLBACK]) ? $rule[self::KEY_CALLBACK] : $callback;
+            $arrayType =  $rule[self::KEY_ARRAY_TYPE] ?? $arrayType;
         }
 
         if (!array_key_exists($key, $data) && $require) {
@@ -281,6 +284,10 @@ class Validator
                 } elseif ($includeRule) {
                     foreach ($data[$key] as $element) {
                         $this->validate(json_encode($element), $includeRule);
+                    }
+                } elseif ($arrayType) {
+                    foreach ($data[$key] as $element) {
+                        $this->validate(json_encode([$key => $element]), [$key => [self::KEY_TYPE => $arrayType]]);
                     }
                 }
 
