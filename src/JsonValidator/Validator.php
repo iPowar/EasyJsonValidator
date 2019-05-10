@@ -9,48 +9,37 @@ use DateTime;
  */
 class Validator
 {
-    const TYPE_STRING = 'string';
-    const TYPE_INTEGER = 'int';
-    const TYPE_BOOLEAN = 'bool';
-    const TYPE_NUMBER = 'number';
-    const TYPE_ARRAY = 'array';
-    const TYPE_NULL = 'null';
-    const TYPE_ANY = 'any';
-    const TYPE_DATETIME = 'datetime';
+    public const TYPE_STRING = 'string';
+    public const TYPE_INTEGER = 'int';
+    public const TYPE_BOOLEAN = 'bool';
+    public const TYPE_NUMBER = 'number';
+    public const TYPE_ARRAY = 'array';
+    public const TYPE_ANY = 'any';
+    public const TYPE_NULL = 'null';
+    public const TYPE_DATETIME = 'datetime';
 
-    const KEY_TYPE = 'type';
-    const KEY_REQUIRE = 'require';
-    const KEY_MIN_STR = 'min-str';
-    const KEY_MIN_VAL = 'min-val';
-    const KEY_MAX_STR = 'max-str';
-    const KEY_MAX_VAL = 'max-val';
-    const KEY_CALLBACK = 'callback';
+    public const KEY_TYPE = 'type';
+    public const KEY_REQUIRE = 'require';
+    public const KEY_MIN_STR = 'min-str';
+    public const KEY_MIN_VAL = 'min-val';
+    public const KEY_MAX_STR = 'max-str';
+    public const KEY_MAX_VAL = 'max-val';
+    public const KEY_CALLBACK = 'callback';
+    public const KEY_LABEL = 'label';
 
-    const KEY_PATTERN = 'pattern';
-    const KEY_FORMAT = 'format';
-    const KEY_RULE = 'rule';
-    const KEY_ARRAY_TYPE = 'array-type';
+    public const KEY_PATTERN = 'pattern';
+    public const KEY_FORMAT = 'format';
+    public const KEY_RULE = 'rule';
+    public const KEY_ARRAY_TYPE = 'array-type';
+    public const KEY_BOOL_VAL = 'bool-val';
 
-    /**
-     * @var array
-     */
-    private $errorList = array();
+    /** @var array */
+    private $errorList = [];
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private $dateTimeFormat = DateTime::ISO8601;
 
-    /**
-     * @var array
-     */
-    private $errorFieldList;
-
-    /**
-     * @param string $json
-     * @param array $rules
-     */
-    public function validate($json, array $rules)
+    public function validate(string $json, array $rules): void
     {
         $data = $this->parseJson($json);
         if ($this->hasErrors()) {
@@ -65,43 +54,17 @@ class Validator
         }
     }
 
-    /**
-     * @return bool
-     */
-    public function hasErrors()
+    public function hasErrors(): bool
     {
         return !empty($this->errorList) ?: false;
     }
 
-    /**
-     * @return bool
-     */
-    public function hasErrorField()
-    {
-        return !empty($this->errorFieldList) ?: false;
-    }
-
-    /**
-     * @return array
-     */
-    public function getErrors()
+    public function getErrors(): ?array
     {
         return $this->errorList;
     }
 
-    /**
-     * @return array
-     */
-    public function getErrorFieldList()
-    {
-        return $this->errorFieldList;
-    }
-
-    /**
-     * @param string $json
-     * @return array
-     */
-    protected function parseJson($json)
+    protected function parseJson(string $json): ?array
     {
         $data = json_decode($json, true);
 
@@ -110,22 +73,16 @@ class Validator
         }
 
         $this->addError(json_last_error_msg());
+
+        return null;
     }
 
-    /**
-     * @param string $message
-     */
-    protected function addError($message)
+    protected function addError(string $message, ?string $key = null, ?string $label = null): void
     {
-        $this->errorList[] = $message;
+        $this->errorList[$key] = $label ?? $message;
     }
 
-    /**
-     * @param string $rule
-     * @param string|null $key
-     * @return bool
-     */
-    private function checkRule($rule, $key = null)
+    private function checkRule($rule, ?string $key): bool
     {
         if (!is_array($rule)) {
             return $this->checkRuleType($rule);
@@ -155,27 +112,66 @@ class Validator
         return true;
     }
 
-    /**
-     * @return array
-     */
-    private function getRulesOptions()
+    private function getRulesOptions(): array
     {
         return [
-            self::TYPE_STRING => [self::KEY_REQUIRE, self::KEY_MIN_STR, self::KEY_MAX_STR, self::KEY_PATTERN, self::KEY_CALLBACK],
-            self::TYPE_DATETIME => [self::KEY_REQUIRE, self::KEY_MIN_VAL, self::KEY_MAX_VAL, self::KEY_FORMAT, self::KEY_CALLBACK],
-            self::TYPE_INTEGER => [self::KEY_REQUIRE, self::KEY_MIN_VAL, self::KEY_MAX_VAL, self::KEY_MIN_STR, self::KEY_MAX_STR, self::KEY_CALLBACK],
-            self::TYPE_NUMBER => [self::KEY_REQUIRE, self::KEY_MIN_VAL, self::KEY_MAX_VAL, self::KEY_MIN_STR, self::KEY_MAX_STR, self::KEY_CALLBACK],
-            self::TYPE_ARRAY => [self::KEY_REQUIRE, self::KEY_MIN_VAL, self::KEY_MAX_VAL, self::KEY_RULE, self::KEY_ARRAY_TYPE],
-            self::TYPE_BOOLEAN => [self::KEY_REQUIRE, self::KEY_CALLBACK],
-            self::TYPE_NULL => [self::KEY_REQUIRE],
-            self::TYPE_ANY => [self::KEY_REQUIRE],
+            self::TYPE_STRING => [
+                self::KEY_REQUIRE,
+                self::KEY_MIN_STR,
+                self::KEY_MAX_STR,
+                self::KEY_PATTERN,
+                self::KEY_CALLBACK,
+                self::KEY_LABEL,
+            ],
+            self::TYPE_DATETIME => [
+                self::KEY_REQUIRE,
+                self::KEY_MIN_VAL,
+                self::KEY_MAX_VAL,
+                self::KEY_FORMAT,
+                self::KEY_LABEL,
+            ],
+            self::TYPE_INTEGER => [
+                self::KEY_REQUIRE,
+                self::KEY_MIN_VAL,
+                self::KEY_MAX_VAL,
+                self::KEY_MIN_STR,
+                self::KEY_MAX_STR,
+                self::KEY_LABEL,
+            ],
+            self::TYPE_NUMBER => [
+                self::KEY_REQUIRE,
+                self::KEY_MIN_VAL,
+                self::KEY_MAX_VAL,
+                self::KEY_MIN_STR,
+                self::KEY_MAX_STR,
+                self::KEY_LABEL,
+            ],
+            self::TYPE_ARRAY => [
+                self::KEY_REQUIRE,
+                self::KEY_MIN_VAL,
+                self::KEY_MAX_VAL,
+                self::KEY_RULE,
+                self::KEY_ARRAY_TYPE,
+                self::KEY_LABEL,
+            ],
+            self::TYPE_BOOLEAN => [
+                self::KEY_REQUIRE,
+                self::KEY_BOOL_VAL,
+                self::KEY_LABEL,
+            ],
+            self::TYPE_ANY => [
+                self::KEY_REQUIRE,
+                self::KEY_CALLBACK,
+                self::KEY_LABEL,
+            ],
+            self::TYPE_NULL => [
+                self::KEY_REQUIRE,
+                self::KEY_LABEL,
+            ],
         ];
     }
 
-    /**
-     * @return array
-     */
-    private function getTypes()
+    private function getTypes(): array
     {
         return [
             self::TYPE_STRING,
@@ -183,8 +179,8 @@ class Validator
             self::TYPE_BOOLEAN,
             self::TYPE_NUMBER,
             self::TYPE_ARRAY,
-            self::TYPE_NULL,
             self::TYPE_ANY,
+            self::TYPE_NULL,
             self::TYPE_DATETIME,
         ];
     }
@@ -193,7 +189,7 @@ class Validator
      * @param string $rule
      * @return bool
      */
-    private function checkRuleType($rule)
+    private function checkRuleType(string $rule): bool
     {
         if (!in_array($rule, $this->getTypes())) {
             $this->addError($rule . ' not supported');
@@ -204,12 +200,7 @@ class Validator
         return true;
     }
 
-    /**
-     * @param $key
-     * @param $rule
-     * @param $data
-     */
-    private function check($key, $rule, $data)
+    private function check(string $key, $rule, array $data): void
     {
         $require = true;
         $pattern = null;
@@ -222,25 +213,28 @@ class Validator
         $includeRule = null;
         $callback = null;
         $arrayType = null;
+        $label = null;
+        $boolVal = null;
 
         if (is_array($rule)) {
             $require = isset($rule[self::KEY_REQUIRE]) && is_bool($rule[self::KEY_REQUIRE]) ? $rule[self::KEY_REQUIRE] : $require;
-            $maxStr = !empty($rule[self::KEY_MAX_STR]) ? $rule[self::KEY_MAX_STR] : $maxStr;
-            $minStr = !empty($rule[self::KEY_MIN_STR]) ? $rule[self::KEY_MIN_STR] : $minStr;
-            $maxVal = !empty($rule[self::KEY_MAX_VAL]) ? $rule[self::KEY_MAX_VAL] : $maxVal;
-            $minVal = !empty($rule[self::KEY_MIN_VAL]) ? $rule[self::KEY_MIN_VAL] : $minVal;
-            $ruleKey = $rule[self::KEY_TYPE];
-            $format = !empty($rule[self::KEY_FORMAT]) ? $rule[self::KEY_FORMAT] : $format;
-            $includeRule = !empty($rule[self::KEY_RULE]) ? $rule[self::KEY_RULE] : $includeRule;
-            $pattern = !empty($rule[self::KEY_PATTERN]) ? $rule[self::KEY_PATTERN] : $pattern;
+            $maxStr = $rule[self::KEY_MAX_STR] ?? null;
+            $minStr = $rule[self::KEY_MIN_STR] ?? null;
+            $maxVal = $rule[self::KEY_MAX_VAL] ?? null;
+            $minVal = $rule[self::KEY_MIN_VAL] ?? null;
+            $ruleKey = $rule[self::KEY_TYPE] ?? null;
+            $format = $rule[self::KEY_FORMAT] ?? null;
+            $includeRule = $rule[self::KEY_RULE] ?? null;
+            $pattern = $rule[self::KEY_PATTERN] ?? null;
             /** @var \Closure $callback */
-            $callback = !empty($rule[self::KEY_CALLBACK]) ? $rule[self::KEY_CALLBACK] : $callback;
-            $arrayType =  $rule[self::KEY_ARRAY_TYPE] ?? $arrayType;
+            $callback = $rule[self::KEY_CALLBACK] ?? null;
+            $arrayType = $rule[self::KEY_ARRAY_TYPE] ?? null;
+            $label = $rule[self::KEY_LABEL] ?? null;
+            $boolVal = $rule[self::KEY_BOOL_VAL] ?? null;
         }
 
         if (!array_key_exists($key, $data) && $require) {
-            $this->addError($key . ' is require');
-            $this->addFiledError($key, 'is require');
+            $this->addError('is require', $key, $label);
 
             return;
         } elseif (!array_key_exists($key, $data) && !$require) {
@@ -250,8 +244,7 @@ class Validator
         switch ($ruleKey) {
             case self::TYPE_INTEGER:
                 if (!is_int($data[$key])) {
-                    $this->addError($key . ' must be ' . self::TYPE_INTEGER);
-                    $this->addFiledError($key, ' must be ' . self::TYPE_INTEGER);
+                    $this->addError('must be ' . self::TYPE_INTEGER, $key, $label);
 
                     return;
                 }
@@ -259,8 +252,7 @@ class Validator
                 break;
             case self::TYPE_NUMBER:
                 if (!is_numeric($data[$key])) {
-                    $this->addError($key . ' must be ' . self::TYPE_NUMBER);
-                    $this->addFiledError($key, ' must be ' . self::TYPE_NUMBER);
+                    $this->addError('must be ' . self::TYPE_NUMBER, $key, $label);
 
                     return;
                 }
@@ -268,8 +260,27 @@ class Validator
                 break;
             case self::TYPE_STRING:
                 if (!is_string($data[$key])) {
-                    $this->addError($key . ' must be ' . self::TYPE_STRING);
-                    $this->addFiledError($key, ' must be ' . self::TYPE_STRING);
+                    $this->addError('must be ' . self::TYPE_STRING, $key, $label);
+
+                    return;
+                }
+
+                break;
+            case self::TYPE_BOOLEAN:
+                if (!is_bool($data[$key])) {
+                    $this->addError('must be ' . self::TYPE_BOOLEAN, $key, $label);
+
+                    return;
+                }
+
+                if (isset($boolVal) && !is_bool($boolVal)) {
+                    $this->addError('rule ' . self::TYPE_BOOLEAN . ' must be with KEY_BOOL_VAL', $key, $label);
+
+                    return;
+                }
+
+                if (isset($boolVal) && $data[$key] !== $boolVal) {
+                    $this->addError('rule must be ' . $boolVal, $key, $label);
 
                     return;
                 }
@@ -277,8 +288,7 @@ class Validator
                 break;
             case self::TYPE_ARRAY:
                 if (!is_array($data[$key])) {
-                    $this->addError($key . ' must be ' . self::TYPE_ARRAY);
-                    $this->addFiledError($key, ' must be ' . self::TYPE_ARRAY);
+                    $this->addError('must be ' . self::TYPE_ARRAY, $key, $label);
 
                     return;
                 } elseif ($includeRule) {
@@ -292,10 +302,17 @@ class Validator
                 }
 
                 break;
+            case self::TYPE_ANY:
+                if (is_null($data[$key])) {
+                    $this->addError('must be not null', $key, $label);
+
+                    return;
+                }
+
+                break;
             case self::TYPE_NULL:
                 if (!is_null($data[$key])) {
-                    $this->addError($key . ' must be ' . self::TYPE_NULL);
-                    $this->addFiledError($key, ' must be ' . self::TYPE_NULL);
+                    $this->addError('must be null', $key, $label);
 
                     return;
                 }
@@ -305,14 +322,11 @@ class Validator
                 $dateTime = $data[$key];
                 $format = $format ? $format : $this->dateTimeFormat;
                 if (!DateTime::createFromFormat($format, $dateTime)) {
-                    $this->addError($key . ' must be ' . self::TYPE_DATETIME . '(' . $format . ')');
-                    $this->addFiledError($key, ' must be ' . self::TYPE_DATETIME . '(' . $format . ')');
+                    $this->addError('must be ' . self::TYPE_DATETIME . '(' . $format . ')', $key, $label);
 
                     return;
                 }
 
-                break;
-            case self::TYPE_ANY:
                 break;
             default:
                 $this->addError('type ' . $rule[self::KEY_TYPE] . ' not supported');
@@ -321,42 +335,37 @@ class Validator
         }
 
         if ($maxStr && strlen($data[$key]) > $maxStr) {
-            $this->addError($key . ' must be less than ' . $maxStr . ' symbols');
-            $this->addFiledError($key, ' must be less than ' . $maxStr . ' symbols');
+            $this->addError('must be less than ' . $maxStr . ' symbols', $key, $label);
 
             return;
         }
 
         if ($minStr && strlen($data[$key]) < $minStr) {
-            $this->addError($key . ' must be more than ' . $minStr . ' symbols');
-            $this->addFiledError($key, ' must be more than ' . $minStr . ' symbols');
+            $this->addError('must be more than ' . $minStr . ' symbols', $key, $label);
 
             return;
         }
 
         if ($minVal && $data[$key] < $minVal) {
-            $this->addError($key . ' must be more than ' . $minVal);
-            $this->addFiledError($key, ' must be more than ' . $minVal);
+            $this->addError($key, 'must be more than ' . $minVal, $label);
 
             return;
         }
 
         if ($maxVal && $data[$key] > $maxVal) {
-            $this->addError($key . ' must be less than ' . $maxVal);
-            $this->addFiledError($key, ' must be less than ' . $maxVal);
+            $this->addError('must be less than ' . $maxVal, $key, $label);
 
             return;
         }
 
         if ($pattern !== null) {
-            $result = preg_match($pattern, $key);
+            $result = preg_match($pattern, $data[$key]);
             if ($result === 0) {
-                $this->addError($key . ' must match the pattern ' . $pattern);
-                $this->addFiledError($key, ' must match the pattern ' . $pattern);
+                $this->addError('must match the pattern ' . $pattern, $key, $label);
 
                 return;
             } elseif ($result === false) {
-                $this->addError($pattern . ' has error: ' . preg_last_error());
+                $this->addError($pattern . ' has error: ' . preg_last_error(), $key, $label);
 
                 return;
             }
@@ -364,19 +373,10 @@ class Validator
 
         if ($callback && is_callable($callback)) {
             if (!$callback->call($this, $data[$key])) {
-                $this->addError($key . ' has error by callback');
+                $this->addError('has error by callback', $key, $label);
 
                 return;
             }
         }
-    }
-
-    /**
-     * @param $key
-     * @param $message
-     */
-    private function addFiledError($key, $message)
-    {
-        $this->errorFieldList[$key] = $message;
     }
 }

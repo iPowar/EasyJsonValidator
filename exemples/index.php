@@ -1,44 +1,35 @@
 <?php
+
 use Powar\JsonValidator\Validator;
 
 include_once('../vendor/autoload.php');
 
-$json = ['id' => 11, 'me' => '12', 'numeric' => null, 'date' => date(DateTime::ISO8601)];
+$start = microtime(true);
+$startMemory = memory_get_usage();
+$s = 100000;
 
-$json = json_encode($json);
-$validator = new Validator();
+for ($i = 0; $i < $s; $i++) {
+    $json = ['id' => 11111, 'me' => '12', 'numeric' => '', 'date' => date(DateTime::ISO8601)];
+    $json = json_encode($json);
 
-$rules = [
-    'id' => [
-        Validator::KEY_TYPE => Validator::TYPE_INTEGER,
-        Validator::KEY_MAX_VAL => 10
-    ],
-    'me' => Validator::TYPE_STRING,
-    'numeric' => Validator::TYPE_NULL,
-    'date' => Validator::TYPE_DATETIME,
-];
+    $validator = new Validator();
 
-$validator->validate($json, $rules);
-if ($validator->hasErrors()) {
-    var_dump($validator->getErrors());
+    $rules = [
+        'id' => [
+            Validator::KEY_TYPE => Validator::TYPE_INTEGER,
+            Validator::KEY_MAX_VAL => 10,
+            //Validator::KEY_LABEL => 'error.label'
+        ],
+        'me' => Validator::TYPE_STRING,
+        'numeric' => Validator::TYPE_ANY,
+        'date' => Validator::TYPE_DATETIME,
+    ];
+
+    $validator->validate($json, $rules);
 }
 
+echo (memory_get_usage() - $startMemory) / 1024 . ' mb' . PHP_EOL;
+echo round(microtime(true) - $start, 4) . ' sec' . PHP_EOL;
+echo round(memory_get_peak_usage(), 4) / 1024 . ' mb';
 
-var_dump($validator);
 
-$idRule = [
-        Validator::KEY_TYPE => Validator::TYPE_INTEGER,
-        Validator::KEY_MIN_STR => 1,
-        Validator::KEY_MAX_STR => 11,
-];
-
-$dateRule = [
-    Validator::KEY_TYPE => Validator::TYPE_DATETIME,
-    Validator::KEY_FORMAT => DateTime::ISO8601,
-    Validator::KEY_REQUIRE => false,
-];
-
-$rules = [
-    'some_id' => $idRule,
-    'some_date' => $dateRule,
-];
