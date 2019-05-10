@@ -109,8 +109,8 @@ _**Note that now id contains an array where the required key is Validator :: KEY
 | Validator::KEY_REQUIRE | require | - | just checks whether json contains element. Default true
 | Validator::KEY_MIN_STR | min-str | - | Minimum number of characters (php `strlen`)
 | Validator::KEY_MAX_STR | max-str | - | Maximum number of characters (php `strlen`)
-| Validator::KEY_MIN_VAL | min-val | - | Minimum value (php `<=`)
-| Validator::KEY_MAX_VAL | max-val | - | Maximum value (php `>=`)
+| Validator::KEY_MIN_VAL | min-val | - | Minimum value (php `<`)
+| Validator::KEY_MAX_VAL | max-val | - | Maximum value (php `>`)
 | Validator::KEY_PATTERN | pattern | - | check by regexp (php `preg_match`)
 | Validator::KEY_FORMAT | format | - | create date object from json, by format (php `DateTime::createFromFormat`)
 | Validator::KEY_BOOL | format | - | create date object from json, by format (php `DateTime::createFromFormat`)
