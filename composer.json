@@ -1,6 +1,6 @@
 {
   "name":         "powar/json-validator",
-  "description":  "",
+  "description":  "Simple Json validator for PHP. Very faster, easy to configuration.",
   "keywords":     ["json", "validator", "php"],
   "type":         "library",
   "license":      "MIT",
